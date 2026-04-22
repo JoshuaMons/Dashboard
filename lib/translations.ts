@@ -18,6 +18,11 @@ const translations = {
     newFile: 'New File',
     language: 'Language',
 
+    // Cache banner
+    restoredFromCache: 'Database restored from your last session.',
+    clearCache: 'Clear',
+    dismiss: 'Dismiss',
+
     // Dashboard tabs
     overview: 'Overview',
     handovers: 'Handovers',
@@ -62,6 +67,8 @@ const translations = {
     filterTitle: 'Filters',
     addFilter: 'Add filter',
     clearAllFilters: 'Clear all',
+    applyFilters: 'Apply filters',
+    pendingChanges: 'unapplied changes',
     whereLabel: 'WHERE',
     andLabel: 'AND',
     columnLabel: 'Column',
@@ -86,6 +93,7 @@ const translations = {
     filtered: 'filtered',
     selectColumn: 'Select column…',
     enterValue: 'Enter value…',
+    filtersApplied: 'filters applied',
 
     // Tables page
     tablesOverview: 'Database Tables',
@@ -129,6 +137,11 @@ const translations = {
     newFile: 'Nieuw Bestand',
     language: 'Taal',
 
+    // Cache banner
+    restoredFromCache: 'Database hersteld van uw laatste sessie.',
+    clearCache: 'Wissen',
+    dismiss: 'Verbergen',
+
     // Dashboard tabs
     overview: 'Overzicht',
     handovers: 'Handovers',
@@ -136,7 +149,7 @@ const translations = {
     // Overview tab
     totalRecords: 'Totaal Records',
     totalTables: 'Tabellen',
-    totalColumns: 'Kolommen',
+    totalColumns: 'Totaal Kolommen',
     dateRange: 'Datumbereik',
     noDate: 'Geen datumkolom',
     recentData: 'Recente Data',
@@ -173,6 +186,8 @@ const translations = {
     filterTitle: 'Filters',
     addFilter: 'Filter toevoegen',
     clearAllFilters: 'Alles wissen',
+    applyFilters: 'Filters toepassen',
+    pendingChanges: 'niet-toegepaste wijzigingen',
     whereLabel: 'WAARBIJ',
     andLabel: 'EN',
     columnLabel: 'Kolom',
@@ -197,6 +212,7 @@ const translations = {
     filtered: 'gefilterd',
     selectColumn: 'Selecteer kolom…',
     enterValue: 'Voer waarde in…',
+    filtersApplied: 'filters toegepast',
 
     // Tables page
     tablesOverview: 'Databasetabellen',

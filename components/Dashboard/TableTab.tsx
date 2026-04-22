@@ -18,21 +18,27 @@ interface Props {
 
 export default function TableTab({ table, analytics }: Props) {
   const { t } = useLanguage();
-  const [filters, setFilters] = useState<FilterRule[]>([]);
+  // pending = what's in the filter panel editor
+  // applied = what's actually filtering the table (only updates on Apply click)
+  const [appliedFilters, setAppliedFilters] = useState<FilterRule[]>([]);
 
   const filteredData = useMemo(
-    () => applyFilters(table.data, filters),
-    [table.data, filters]
+    () => applyFilters(table.data, appliedFilters),
+    [table.data, appliedFilters]
   );
 
   const { metrics, charts } = analytics;
   const timeSeries = charts.find((c) => c.type === 'area' || c.type === 'line');
-  const catCharts = charts.filter((c) => c.type !== 'area' && c.type !== 'line');
+  const otherCharts = charts.filter((c) => c.type !== 'area' && c.type !== 'line');
 
   return (
     <div className="space-y-5">
-      {/* Filter builder */}
-      <FilterPanel columns={table.columns} filters={filters} onChange={setFilters} />
+      {/* Filter builder — passes appliedFilters so panel can show what's active */}
+      <FilterPanel
+        columns={table.columns}
+        appliedFilters={appliedFilters}
+        onApply={setAppliedFilters}
+      />
 
       {/* KPI cards */}
       <MetricCards metrics={metrics} />
@@ -40,10 +46,10 @@ export default function TableTab({ table, analytics }: Props) {
       {/* Time series full width */}
       {timeSeries && <TimeSeriesChart config={timeSeries} />}
 
-      {/* Category charts */}
-      {catCharts.length > 0 && (
+      {/* All other charts in a responsive grid */}
+      {otherCharts.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {catCharts.map((c) => <CategoryChart key={c.id} config={c} />)}
+          {otherCharts.map((c) => <CategoryChart key={c.id} config={c} />)}
         </div>
       )}
 
@@ -54,7 +60,7 @@ export default function TableTab({ table, analytics }: Props) {
         </div>
       )}
 
-      {/* Data table with filtered rows */}
+      {/* Data table — shows filtered rows, total row count always visible */}
       <DataTable table={table} data={filteredData} />
     </div>
   );

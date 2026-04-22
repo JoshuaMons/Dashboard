@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { DatabaseInfo, FullAnalyticsResult } from '@/types';
 import { analyseDatabase } from '@/lib/analytics';
+import { saveToStorage, loadFromStorage, clearStorage } from '@/lib/storage';
 
 interface DatabaseContextValue {
   database: DatabaseInfo | null;
@@ -11,8 +12,10 @@ interface DatabaseContextValue {
   progress: number;
   progressMsg: string;
   error: string | null;
+  isRestoredFromCache: boolean;
   loadFile: (file: File) => Promise<void>;
   clearDatabase: () => void;
+  dismissCacheBanner: () => void;
 }
 
 const DatabaseContext = createContext<DatabaseContextValue>({
@@ -22,8 +25,10 @@ const DatabaseContext = createContext<DatabaseContextValue>({
   progress: 0,
   progressMsg: '',
   error: null,
+  isRestoredFromCache: false,
   loadFile: async () => {},
   clearDatabase: () => {},
+  dismissCacheBanner: () => {},
 });
 
 export function DatabaseProvider({ children }: { children: ReactNode }) {
@@ -33,6 +38,22 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [progress, setProgress] = useState(0);
   const [progressMsg, setProgressMsg] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isRestoredFromCache, setIsRestoredFromCache] = useState(false);
+
+  // Restore from localStorage on first render (client only)
+  useEffect(() => {
+    const stored = loadFromStorage();
+    if (stored) {
+      try {
+        const result = analyseDatabase(stored.tables);
+        setDatabase(stored);
+        setAnalytics(result);
+        setIsRestoredFromCache(true);
+      } catch {
+        clearStorage();
+      }
+    }
+  }, []);
 
   async function loadFile(file: File) {
     setIsLoading(true);
@@ -48,6 +69,8 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
       const result = analyseDatabase(info.tables);
       setDatabase(info);
       setAnalytics(result);
+      setIsRestoredFromCache(false);
+      saveToStorage(info);
     } catch (e: any) {
       setError(e?.message ?? 'Unknown error');
     } finally {
@@ -61,12 +84,19 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     setDatabase(null);
     setAnalytics(null);
     setError(null);
-    setProgress(0);
-    setProgressMsg('');
+    setIsRestoredFromCache(false);
+    clearStorage();
+  }
+
+  function dismissCacheBanner() {
+    setIsRestoredFromCache(false);
   }
 
   return (
-    <DatabaseContext.Provider value={{ database, analytics, isLoading, progress, progressMsg, error, loadFile, clearDatabase }}>
+    <DatabaseContext.Provider value={{
+      database, analytics, isLoading, progress, progressMsg, error,
+      isRestoredFromCache, loadFile, clearDatabase, dismissCacheBanner,
+    }}>
       {children}
     </DatabaseContext.Provider>
   );

@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, X, Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { FilterRule, FilterOperator, ParsedColumn, ColumnType } from '@/types';
+import { useState, useEffect } from 'react';
+import { Plus, X, Filter, ChevronDown, ChevronUp, Play, AlertCircle } from 'lucide-react';
+import { FilterRule, FilterOperator, ParsedColumn } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { operatorsForType, defaultOperator, newFilter } from '@/lib/filters';
 import { clsx } from 'clsx';
 
 interface Props {
   columns: ParsedColumn[];
-  filters: FilterRule[];
-  onChange: (filters: FilterRule[]) => void;
+  appliedFilters: FilterRule[];        // what's actually filtering the table
+  onApply: (filters: FilterRule[]) => void;
 }
 
 const OP_KEY_MAP: Record<FilterOperator, string> = {
@@ -22,37 +22,35 @@ const OP_KEY_MAP: Record<FilterOperator, string> = {
   is_empty: 'opIsEmpty', is_not_empty: 'opIsNotEmpty',
 };
 
-const inputClass = 'h-8 px-2.5 text-sm border border-surface-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent';
-const selectClass = `${inputClass} pr-6 cursor-pointer`;
+const inputCls = 'h-8 px-2.5 text-sm border border-surface-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent';
+const selCls   = `${inputCls} pr-6 cursor-pointer`;
 
 function ValueInput({ filter, col, onChange }: {
   filter: FilterRule;
   col: ParsedColumn | undefined;
-  onChange: (patch: Partial<FilterRule>) => void;
+  onChange: (p: Partial<FilterRule>) => void;
 }) {
   const { t } = useLanguage();
-  const noValueOps: FilterOperator[] = ['is_empty', 'is_not_empty'];
-  if (noValueOps.includes(filter.operator)) return null;
+  const noVal: FilterOperator[] = ['is_empty', 'is_not_empty'];
+  if (noVal.includes(filter.operator)) return null;
 
   const type = col?.inferredType ?? 'text';
   const inputType = type === 'number' ? 'number' : type === 'date' ? 'date' : 'text';
 
   if (filter.operator === 'between') {
     return (
-      <div className="flex items-center gap-1.5">
-        <input type={inputType} value={filter.value} onChange={(e) => onChange({ value: e.target.value })}
-          placeholder={t('enterValue')} className={clsx(inputClass, 'w-28')} />
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <input type={inputType} value={filter.value} onChange={(e) => onChange({ value: e.target.value })} placeholder={t('enterValue')} className={clsx(inputCls, 'w-28')} />
         <span className="text-xs text-slate-400">{t('value2Label')}</span>
-        <input type={inputType} value={filter.value2 ?? ''} onChange={(e) => onChange({ value2: e.target.value })}
-          placeholder={t('enterValue')} className={clsx(inputClass, 'w-28')} />
+        <input type={inputType} value={filter.value2 ?? ''} onChange={(e) => onChange({ value2: e.target.value })} placeholder={t('enterValue')} className={clsx(inputCls, 'w-28')} />
       </div>
     );
   }
 
   if (type === 'category' && col && col.sampleValues.length > 0) {
     return (
-      <select value={filter.value} onChange={(e) => onChange({ value: e.target.value })} className={clsx(selectClass, 'min-w-[120px]')}>
-        <option value="">{t('enterValue')}</option>
+      <select value={filter.value} onChange={(e) => onChange({ value: e.target.value })} className={clsx(selCls, 'min-w-[120px]')}>
+        <option value="">—</option>
         {col.sampleValues.map((v) => <option key={v} value={v}>{v}</option>)}
       </select>
     );
@@ -60,7 +58,7 @@ function ValueInput({ filter, col, onChange }: {
 
   if (type === 'boolean') {
     return (
-      <select value={filter.value} onChange={(e) => onChange({ value: e.target.value })} className={clsx(selectClass, 'w-28')}>
+      <select value={filter.value} onChange={(e) => onChange({ value: e.target.value })} className={clsx(selCls, 'w-28')}>
         <option value="">—</option>
         {['true', 'false', 'ja', 'nee', '1', '0', 'yes', 'no'].map((v) => <option key={v} value={v}>{v}</option>)}
       </select>
@@ -68,125 +66,108 @@ function ValueInput({ filter, col, onChange }: {
   }
 
   return (
-    <input type={inputType} value={filter.value} onChange={(e) => onChange({ value: e.target.value })}
-      placeholder={t('enterValue')} className={clsx(inputClass, 'min-w-[140px]')} />
+    <input type={inputType} value={filter.value} onChange={(e) => onChange({ value: e.target.value })} placeholder={t('enterValue')} className={clsx(inputCls, 'min-w-[140px]')} />
   );
 }
 
-export default function FilterPanel({ columns, filters, onChange }: Props) {
+export default function FilterPanel({ columns, appliedFilters, onApply }: Props) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
+  // Local "pending" state — only committed to parent on Apply
+  const [local, setLocal] = useState<FilterRule[]>(appliedFilters);
 
-  function add() {
-    onChange([...filters, newFilter(columns)]);
-    setOpen(true);
-  }
+  // If parent resets applied filters externally, sync local state
+  useEffect(() => {
+    setLocal(appliedFilters);
+  }, [appliedFilters]);
 
-  function remove(id: string) { onChange(filters.filter((f) => f.id !== id)); }
-  function clear() { onChange([]); }
+  const isDirty = JSON.stringify(local) !== JSON.stringify(appliedFilters);
+
+  function add() { setLocal((f) => [...f, newFilter(columns)]); setOpen(true); }
+  function remove(id: string) { setLocal((f) => f.filter((x) => x.id !== id)); }
+  function clearLocal() { setLocal([]); }
 
   function patch(id: string, update: Partial<FilterRule>) {
-    onChange(filters.map((f) => {
+    setLocal((prev) => prev.map((f) => {
       if (f.id !== id) return f;
       const next = { ...f, ...update };
-      // When column changes, reset operator to a valid one for new column type
       if (update.column && update.column !== f.column) {
         const col = columns.find((c) => c.originalName === update.column);
         next.operator = defaultOperator(col?.inferredType ?? 'text');
-        next.value = '';
-        next.value2 = undefined;
+        next.value = ''; next.value2 = undefined;
       }
-      // When operator changes to non-value op, clear value
-      if (update.operator && (['is_empty', 'is_not_empty'] as FilterOperator[]).includes(update.operator as FilterOperator)) {
-        next.value = '';
-        next.value2 = undefined;
+      const noVal: FilterOperator[] = ['is_empty', 'is_not_empty'];
+      if (update.operator && noVal.includes(update.operator as FilterOperator)) {
+        next.value = ''; next.value2 = undefined;
       }
       return next;
     }));
   }
 
-  const hasFilters = filters.length > 0;
+  function handleApply() {
+    onApply(local);
+    // keep open so user sees what's applied
+  }
+
+  const appliedCount = appliedFilters.length;
 
   return (
-    <div className="card overflow-hidden">
-      {/* Header bar */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-surface-50 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-500" />
+    <div className={clsx('card overflow-hidden transition-all', isDirty && 'ring-2 ring-amber-400/60')}>
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3">
+        <button onClick={() => setOpen((v) => !v)} className="flex-1 flex items-center gap-2 text-left">
+          <Filter className="w-4 h-4 text-slate-500 flex-shrink-0" />
           <span className="font-medium text-slate-700 text-sm">{t('filterTitle')}</span>
-          {hasFilters && (
+          {appliedCount > 0 && (
             <span className="bg-primary-100 text-primary-700 text-xs font-bold px-2 py-0.5 rounded-full">
-              {filters.length}
+              {appliedCount} {t('filtersApplied')}
             </span>
           )}
-        </div>
-        <div className="flex items-center gap-2">
-          {hasFilters && (
-            <span
-              onClick={(e) => { e.stopPropagation(); clear(); }}
-              className="text-xs text-slate-400 hover:text-red-500 transition-colors cursor-pointer select-none"
-            >
+          {isDirty && (
+            <span className="flex items-center gap-1 text-xs text-amber-600 font-medium">
+              <AlertCircle className="w-3.5 h-3.5" />
+              {t('pendingChanges')}
+            </span>
+          )}
+        </button>
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {local.length > 0 && (
+            <button onClick={(e) => { e.stopPropagation(); clearLocal(); }} className="text-xs text-slate-400 hover:text-red-500 transition-colors">
               {t('clearAllFilters')}
-            </span>
+            </button>
           )}
-          <span
-            onClick={(e) => { e.stopPropagation(); add(); }}
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors cursor-pointer select-none"
-          >
+          <button onClick={(e) => { e.stopPropagation(); add(); }} className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors">
             <Plus className="w-3.5 h-3.5" />
             {t('addFilter')}
-          </span>
-          {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </button>
+          <button onClick={() => setOpen((v) => !v)} className="text-slate-400">
+            {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
         </div>
-      </button>
+      </div>
 
       {/* Filter rows */}
       {open && (
-        <div className="border-t border-surface-200 px-4 py-3 space-y-2 bg-surface-50/40">
-          {!hasFilters ? (
-            <p className="text-sm text-slate-400 py-2 text-center">
-              {t('addFilter')} →
-            </p>
+        <div className="border-t border-surface-200 bg-surface-50/40 px-4 py-3 space-y-2">
+          {local.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-2">{t('addFilter')} →</p>
           ) : (
-            filters.map((filter, idx) => {
+            local.map((filter, idx) => {
               const col = columns.find((c) => c.originalName === filter.column);
               const ops = operatorsForType(col?.inferredType ?? 'text');
               return (
                 <div key={filter.id} className="flex items-center gap-2 flex-wrap">
-                  {/* WHERE / AND label */}
-                  <span className="text-xs font-mono font-semibold text-primary-500 w-14 text-right select-none">
+                  <span className="text-xs font-mono font-bold text-primary-500 w-16 text-right select-none flex-shrink-0">
                     {idx === 0 ? t('whereLabel') : t('andLabel')}
                   </span>
-
-                  {/* Column selector */}
-                  <select
-                    value={filter.column}
-                    onChange={(e) => patch(filter.id, { column: e.target.value })}
-                    className={clsx(selectClass, 'min-w-[130px]')}
-                  >
-                    {columns.map((c) => (
-                      <option key={c.originalName} value={c.originalName}>{c.originalName}</option>
-                    ))}
+                  <select value={filter.column} onChange={(e) => patch(filter.id, { column: e.target.value })} className={clsx(selCls, 'min-w-[130px]')}>
+                    {columns.map((c) => <option key={c.originalName} value={c.originalName}>{c.originalName}</option>)}
                   </select>
-
-                  {/* Operator selector */}
-                  <select
-                    value={filter.operator}
-                    onChange={(e) => patch(filter.id, { operator: e.target.value as FilterOperator })}
-                    className={clsx(selectClass, 'min-w-[140px]')}
-                  >
-                    {ops.map((op) => (
-                      <option key={op} value={op}>{t(OP_KEY_MAP[op] as any)}</option>
-                    ))}
+                  <select value={filter.operator} onChange={(e) => patch(filter.id, { operator: e.target.value as FilterOperator })} className={clsx(selCls, 'min-w-[140px]')}>
+                    {ops.map((op) => <option key={op} value={op}>{t(OP_KEY_MAP[op] as any)}</option>)}
                   </select>
-
-                  {/* Value input */}
                   <ValueInput filter={filter} col={col} onChange={(p) => patch(filter.id, p)} />
-
-                  {/* Remove */}
                   <button onClick={() => remove(filter.id)} className="text-slate-300 hover:text-red-400 transition-colors ml-auto">
                     <X className="w-4 h-4" />
                   </button>
@@ -194,6 +175,25 @@ export default function FilterPanel({ columns, filters, onChange }: Props) {
               );
             })
           )}
+
+          {/* Apply button — always visible when panel is open */}
+          <div className="pt-2 flex items-center justify-between border-t border-surface-200 mt-3">
+            <span className="text-xs text-slate-400">
+              {isDirty ? t('pendingChanges') : appliedCount > 0 ? `${appliedCount} ${t('filtersApplied')}` : ''}
+            </span>
+            <button
+              onClick={handleApply}
+              className={clsx(
+                'inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all',
+                isDirty
+                  ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm shadow-primary-200'
+                  : 'bg-surface-100 text-slate-500 hover:bg-surface-200'
+              )}
+            >
+              <Play className="w-3.5 h-3.5" />
+              {t('applyFilters')}
+            </button>
+          </div>
         </div>
       )}
     </div>
