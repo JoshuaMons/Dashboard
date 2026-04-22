@@ -106,7 +106,7 @@ function ListView({ data, total, nameKey, valueKey, lang, t }: {
   const maxVal = Number(topItems[0]?.[valueKey]) || 1;
 
   return (
-    <div className="space-y-1.5 mt-1">
+    <div className="space-y-1 mt-2">
       {topItems.map((d, i) => {
         const name = String(d[nameKey]);
         const val  = Number(d[valueKey]) || 0;
@@ -115,53 +115,51 @@ function ListView({ data, total, nameKey, valueKey, lang, t }: {
         const color = COLORS[i % COLORS.length];
 
         return (
-          <div key={name} className="flex items-center gap-2.5 group">
-            {/* Rank */}
-            <span className="text-xs tabular-nums text-slate-300 dark:text-slate-600 w-5 text-right flex-shrink-0 font-medium">
+          <div key={name} className="flex items-center gap-2 min-h-[28px]">
+            {/* Rank — fixed 20px */}
+            <span className="text-xs tabular-nums text-slate-300 dark:text-slate-600 w-5 text-right flex-shrink-0">
               {i + 1}
             </span>
-            {/* Color dot */}
+            {/* Color dot — fixed 8px */}
             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-            {/* Name */}
+            {/* Name — fixed 160px, truncate */}
             <span
-              className="text-sm text-slate-700 dark:text-slate-200 flex-shrink-0 truncate"
-              style={{ maxWidth: '38%' }}
+              className="text-xs text-slate-700 dark:text-slate-200 flex-shrink-0 truncate w-40"
               title={name}
             >
               {name}
             </span>
-            {/* Bar */}
-            <div className="flex-1 h-5 bg-surface-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            {/* Bar — fills remaining space */}
+            <div className="flex-1 h-4 bg-surface-100 dark:bg-slate-700 rounded-full overflow-hidden min-w-[40px]">
               <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${barW}%`, backgroundColor: color, opacity: 0.8 }}
+                style={{ width: `${barW}%`, backgroundColor: color, opacity: 0.75 }}
               />
             </div>
-            {/* Stats */}
-            <div className="flex items-center gap-2 flex-shrink-0 text-right">
-              <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 w-12">
-                {val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toLocaleString()}
-              </span>
-              <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 w-10">
-                {pct.toFixed(1)}%
-              </span>
-            </div>
+            {/* Count — fixed 52px right-aligned */}
+            <span className="text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200 w-13 text-right flex-shrink-0" style={{ minWidth: '3.25rem' }}>
+              {val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toLocaleString()}
+            </span>
+            {/* Pct — fixed 44px right-aligned */}
+            <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 flex-shrink-0 text-right" style={{ minWidth: '2.75rem' }}>
+              {pct.toFixed(1)}%
+            </span>
           </div>
         );
       })}
 
       {otherCount > 0 && (
-        <div className="flex items-center gap-2.5 mt-1 pt-2 border-t border-surface-100 dark:border-slate-700">
-          <span className="text-xs text-slate-300 dark:text-slate-600 w-5 text-right">+</span>
+        <div className="flex items-center gap-2 pt-2 mt-1 border-t border-surface-100 dark:border-slate-700">
+          <span className="w-5 flex-shrink-0" />
           <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 flex-shrink-0" />
-          <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0">
+          <span className="text-xs text-slate-400 dark:text-slate-500 w-40 flex-shrink-0 truncate">
             {t('chartOther')} ({otherCats} {t('chartOtherCategories')})
           </span>
           <div className="flex-1" />
-          <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 w-12 text-right">
+          <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 text-right flex-shrink-0" style={{ minWidth: '3.25rem' }}>
             {otherCount >= 1000 ? `${(otherCount / 1000).toFixed(1)}k` : otherCount.toLocaleString()}
           </span>
-          <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 w-10 text-right">
+          <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 text-right flex-shrink-0" style={{ minWidth: '2.75rem' }}>
             {total > 0 ? ((otherCount / total) * 100).toFixed(1) : 0}%
           </span>
         </div>

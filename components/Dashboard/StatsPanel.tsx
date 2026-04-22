@@ -17,7 +17,6 @@ function fmt(n: number): string {
   return Number.isInteger(n) ? n.toString() : n.toFixed(2);
 }
 
-// Tooltip shown on stat column headers
 const STAT_TIPS: Record<string, [string, string]> = {
   min:    ['The smallest value found in this column.', 'De kleinste waarde in deze kolom.'],
   max:    ['The largest value found in this column.', 'De grootste waarde in deze kolom.'],
@@ -48,7 +47,7 @@ function RangeBar({ minN, maxN, meanN, medianN }: {
   minN: number; maxN: number; meanN: number; medianN: number;
 }) {
   const range = maxN - minN;
-  if (range === 0) return <span className="text-xs text-slate-300 tabular-nums">{fmt(minN)}</span>;
+  if (range === 0) return <span className="text-xs text-slate-300 dark:text-slate-600 tabular-nums">{fmt(minN)}</span>;
 
   const meanPct  = ((meanN  - minN) / range) * 100;
   const medPct   = ((medianN - minN) / range) * 100;
@@ -58,20 +57,18 @@ function RangeBar({ minN, maxN, meanN, medianN }: {
       className="flex items-center gap-1.5 w-full min-w-[100px]"
       title={`Mean: ${fmt(meanN)} · Median: ${fmt(medianN)}`}
     >
-      <span className="text-xs tabular-nums text-slate-400 flex-shrink-0 text-right w-8">{fmt(minN)}</span>
-      <div className="relative flex-1 h-2 bg-surface-200 rounded-full">
-        {/* Mean dot — indigo */}
+      <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 flex-shrink-0 text-right w-8">{fmt(minN)}</span>
+      <div className="relative flex-1 h-2 bg-surface-200 dark:bg-slate-600 rounded-full">
         <div
-          className="absolute w-2.5 h-2.5 bg-primary-500 rounded-full border-2 border-white shadow-sm"
+          className="absolute w-2.5 h-2.5 bg-primary-500 rounded-full border-2 border-white dark:border-slate-800 shadow-sm"
           style={{ left: `${meanPct}%`, top: '50%', transform: 'translate(-50%, -50%)' }}
         />
-        {/* Median dot — emerald */}
         <div
-          className="absolute w-2 h-2 bg-emerald-500 rounded-full border-2 border-white shadow-sm"
+          className="absolute w-2 h-2 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-800 shadow-sm"
           style={{ left: `${medPct}%`, top: '50%', transform: 'translate(-50%, -50%)' }}
         />
       </div>
-      <span className="text-xs tabular-nums text-slate-400 flex-shrink-0 w-8">{fmt(maxN)}</span>
+      <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500 flex-shrink-0 w-8">{fmt(maxN)}</span>
     </div>
   );
 }
@@ -91,12 +88,8 @@ export default function StatsPanel({ table, data }: Props) {
       const nullPct = data.length > 0 ? Math.round((nullCount / data.length) * 100) : 0;
 
       if (vals.length === 0) {
-        return {
-          col: col.originalName,
-          min: '—', max: '—', mean: '—', median: '—',
-          minN: 0, maxN: 0, meanN: 0, medianN: 0,
-          nullCount, nullPct, hasData: false,
-        };
+        return { col: col.originalName, min: '—', max: '—', mean: '—', median: '—',
+          minN: 0, maxN: 0, meanN: 0, medianN: 0, nullCount, nullPct, hasData: false };
       }
 
       const nums = vals.map(Number).sort((a, b) => a - b);
@@ -107,17 +100,11 @@ export default function StatsPanel({ table, data }: Props) {
 
       return {
         col: col.originalName,
-        min: fmt(nums[0]),
-        max: fmt(nums[nums.length - 1]),
-        mean: fmt(mean),
-        median: fmt(median),
-        minN: nums[0],
-        maxN: nums[nums.length - 1],
-        meanN: mean,
-        medianN: median,
-        nullCount,
-        nullPct,
-        hasData: true,
+        min: fmt(nums[0]), max: fmt(nums[nums.length - 1]),
+        mean: fmt(mean), median: fmt(median),
+        minN: nums[0], maxN: nums[nums.length - 1],
+        meanN: mean, medianN: median,
+        nullCount, nullPct, hasData: true,
       };
     });
   }, [numericCols, data]);
@@ -131,57 +118,61 @@ export default function StatsPanel({ table, data }: Props) {
 
   return (
     <div className="card overflow-hidden">
-      <div className="px-5 py-4 border-b border-surface-200 flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-slate-700">{t('statsTitle')}</h3>
-        {/* Legend */}
-        <div className="flex items-center gap-3 text-xs text-slate-400">
-          <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-primary-500 inline-block" />
+      <div className="px-5 py-4 border-b border-surface-200 dark:border-slate-700 flex items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">{t('statsTitle')}</h3>
+        <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-primary-500 inline-block flex-shrink-0" />
             {lang === 'nl' ? 'Gemiddelde' : 'Mean'}
           </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block flex-shrink-0" />
             {lang === 'nl' ? 'Mediaan' : 'Median'}
           </span>
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-xs">
           <thead>
-            <tr className="bg-surface-50 border-b border-surface-200">
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            <tr className="bg-surface-50 dark:bg-slate-700/50 border-b border-surface-200 dark:border-slate-700">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide min-w-[120px]">
                 {t('columnLabel')}
               </th>
               {(['min','max','mean','median','nulls'] as const).map((k) => (
-                <th key={k} className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
+                <th key={k} className="px-4 py-3 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide whitespace-nowrap">
                   <span className="inline-flex items-center justify-end">
                     {t(k === 'nulls' ? 'statNulls' : k === 'min' ? 'statMin' : k === 'max' ? 'statMax' : k === 'mean' ? 'statMean' : 'statMedian')}
                     <InfoTooltip text={tip(k)} pos={k === 'nulls' ? 'left' : 'center'} />
                   </span>
                 </th>
               ))}
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide whitespace-nowrap min-w-[160px]">
                 {lang === 'nl' ? 'Spreiding' : 'Range'}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-surface-100">
+          <tbody className="divide-y divide-surface-100 dark:divide-slate-700">
             {stats.map((s) => (
-              <tr key={s.col} className="hover:bg-surface-50">
-                <td className="px-4 py-3 text-xs font-mono text-slate-600 whitespace-nowrap">{s.col}</td>
-                <td className="px-4 py-3 text-xs text-right tabular-nums text-slate-700">{s.min}</td>
-                <td className="px-4 py-3 text-xs text-right tabular-nums text-slate-700">{s.max}</td>
-                <td className="px-4 py-3 text-xs text-right tabular-nums text-slate-700">{s.mean}</td>
-                <td className="px-4 py-3 text-xs text-right tabular-nums text-slate-700">{s.median}</td>
+              <tr key={s.col} className="hover:bg-surface-50 dark:hover:bg-slate-700/30 transition-colors">
+                <td className="px-4 py-3 text-xs font-mono font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap max-w-[180px] overflow-hidden text-ellipsis" title={s.col}>
+                  {s.col}
+                </td>
+                <td className="px-4 py-3 text-xs text-right tabular-nums text-slate-700 dark:text-slate-300 font-medium">{s.min}</td>
+                <td className="px-4 py-3 text-xs text-right tabular-nums text-slate-700 dark:text-slate-300 font-medium">{s.max}</td>
+                <td className="px-4 py-3 text-xs text-right tabular-nums text-slate-700 dark:text-slate-300 font-medium">{s.mean}</td>
+                <td className="px-4 py-3 text-xs text-right tabular-nums text-slate-700 dark:text-slate-300 font-medium">{s.median}</td>
                 <td className="px-4 py-3 text-xs text-right tabular-nums">
-                  <span className={clsx(s.nullPct > 20 ? 'text-amber-600 font-semibold' : 'text-slate-400')}>
+                  <span className={clsx(
+                    'font-medium tabular-nums',
+                    s.nullPct > 20 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'
+                  )}>
                     {s.nullCount.toLocaleString()} ({s.nullPct}%)
                   </span>
                 </td>
-                <td className="px-4 py-3 w-48">
+                <td className="px-4 py-3">
                   {s.hasData
                     ? <RangeBar minN={s.minN} maxN={s.maxN} meanN={s.meanN} medianN={s.medianN} />
-                    : <span className="text-xs text-slate-300">—</span>
+                    : <span className="text-xs text-slate-300 dark:text-slate-600">—</span>
                   }
                 </td>
               </tr>

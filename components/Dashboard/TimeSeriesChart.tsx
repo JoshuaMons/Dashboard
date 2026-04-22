@@ -113,7 +113,7 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-1">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-slate-700 truncate">{title}</h3>
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{title}</h3>
           {desc && <InfoTooltip text={desc} />}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -140,17 +140,17 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
       </div>
 
       {/* Subtitle */}
-      <p className="text-xs text-slate-400 mb-4">
-        {t('chartTotal')}: <span className="font-medium text-slate-600">{total.toLocaleString()}</span>
-        &ensp;·&ensp;
-        {t('chartAvgPeriod')}: <span className="font-medium text-slate-600">{avg.toLocaleString()}</span>
-        &ensp;·&ensp;
-        <span className="text-slate-400">{config.data.length} {t('chartPeriods')}</span>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4 flex flex-wrap gap-x-2 gap-y-0.5">
+        <span>{t('chartTotal')}: <span className="font-medium text-slate-600 dark:text-slate-300">{total.toLocaleString()}</span></span>
+        <span className="text-slate-300 dark:text-slate-600">·</span>
+        <span>{t('chartAvgPeriod')}: <span className="font-medium text-slate-600 dark:text-slate-300">{avg.toLocaleString()}</span></span>
+        <span className="text-slate-300 dark:text-slate-600">·</span>
+        <span>{config.data.length} {t('chartPeriods')}</span>
       </p>
 
       <ResponsiveContainer width="100%" height={chartHeight}>
         {config.type === 'area' ? (
-          <AreaChart data={config.data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <AreaChart data={config.data} margin={{ top: 4, right: 12, left: 4, bottom: 0 }}>
             <defs>
               <linearGradient id={`grad-${config.id}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor={color} stopOpacity={0.18} />
@@ -158,15 +158,15 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+            <XAxis dataKey={xKey} tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+            <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} width={40} />
             <Tooltip content={(p) => <RichTooltip {...p} total={total} avg={avg} lang={lang} />} />
             <ReferenceLine
               y={avg}
               stroke="#cbd5e1"
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: `avg ${avg.toLocaleString()}`, position: 'insideTopRight', fontSize: 10, fill: '#94a3b8' }}
+              label={{ value: `ø ${avg.toLocaleString()}`, position: 'insideTopRight', fontSize: 10, fill: '#94a3b8' }}
             />
             <Area
               type="monotone"
@@ -182,19 +182,28 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
             )}
           </AreaChart>
         ) : (
-          <BarChart data={config.data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <BarChart data={config.data} margin={{ top: 4, right: 12, left: 4, bottom: config.data.length > 12 ? 24 : 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+            <XAxis
+              dataKey={xKey}
+              tick={{ fontSize: 10, fill: '#94a3b8' }}
+              tickLine={false}
+              axisLine={false}
+              interval={config.data.length > 12 ? 'preserveStartEnd' : 0}
+              angle={config.data.length > 12 ? -35 : 0}
+              textAnchor={config.data.length > 12 ? 'end' : 'middle'}
+              height={config.data.length > 12 ? 40 : 30}
+            />
+            <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} width={40} />
             <Tooltip content={(p) => <RichTooltip {...p} total={total} avg={avg} lang={lang} />} />
             <ReferenceLine
               y={avg}
               stroke="#cbd5e1"
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: `avg ${avg.toLocaleString()}`, position: 'insideTopRight', fontSize: 10, fill: '#94a3b8' }}
+              label={{ value: `ø ${avg.toLocaleString()}`, position: 'insideTopRight', fontSize: 10, fill: '#94a3b8' }}
             />
-            <Bar dataKey={yKey} fill={color} radius={[4, 4, 0, 0]} />
+            <Bar dataKey={yKey} fill={color} radius={[4, 4, 0, 0]} maxBarSize={48} />
             {brushOn && (
               <Brush dataKey={xKey} height={24} stroke="#e2e8f0" travellerWidth={8} fill="#f8fafc" />
             )}
