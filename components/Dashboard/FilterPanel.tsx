@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Plus, X, Filter, ChevronDown, ChevronUp, Play, AlertCircle } from 'lucide-react';
 import { FilterRule, FilterOperator, ParsedColumn } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/types';
 import { operatorsForType, defaultOperator, newFilter } from '@/lib/filters';
 import { clsx } from 'clsx';
 
@@ -21,6 +22,48 @@ const OP_KEY_MAP: Record<FilterOperator, string> = {
   between: 'opBetween',
   is_empty: 'opIsEmpty', is_not_empty: 'opIsNotEmpty',
 };
+
+// Generates a compact human-readable description of a filter rule
+function buildFilterDesc(filter: FilterRule, lang: Language): string | null {
+  const noVal: FilterOperator[] = ['is_empty', 'is_not_empty'];
+  const col = `"${filter.column}"`;
+
+  if (noVal.includes(filter.operator)) {
+    return `${col} ${filter.operator === 'is_empty'
+      ? (lang === 'nl' ? 'is leeg' : 'is empty')
+      : (lang === 'nl' ? 'is niet leeg' : 'is not empty')}`;
+  }
+
+  if (!filter.value) return null;
+
+  const val = `"${filter.value}"`;
+  const val2 = filter.value2 ? `"${filter.value2}"` : '""';
+
+  const OPS: Record<FilterOperator, [string, string]> = {
+    equals:       ['=', '='],
+    not_equals:   ['≠', '≠'],
+    contains:     ['contains', 'bevat'],
+    not_contains: ['does not contain', 'bevat niet'],
+    starts_with:  ['starts with', 'begint met'],
+    ends_with:    ['ends with', 'eindigt met'],
+    greater_than: ['>', '>'],
+    less_than:    ['<', '<'],
+    between:      ['between', 'tussen'],
+    is_empty:     ['is empty', 'is leeg'],
+    is_not_empty: ['is not empty', 'is niet leeg'],
+  };
+
+  const [en, nl] = OPS[filter.operator] ?? [filter.operator, filter.operator];
+  const op = lang === 'nl' ? nl : en;
+
+  if (filter.operator === 'between') {
+    return lang === 'nl'
+      ? `${col} tussen ${val} en ${val2}`
+      : `${col} between ${val} and ${val2}`;
+  }
+
+  return `${col} ${op} ${val}`;
+}
 
 const inputCls = 'h-8 px-2.5 text-sm border border-surface-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent';
 const selCls   = `${inputCls} pr-6 cursor-pointer`;
@@ -71,7 +114,7 @@ function ValueInput({ filter, col, onChange }: {
 }
 
 export default function FilterPanel({ columns, appliedFilters, onApply }: Props) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [open, setOpen] = useState(false);
   // Local "pending" state — only committed to parent on Apply
   const [local, setLocal] = useState<FilterRule[]>(appliedFilters);
@@ -156,21 +199,29 @@ export default function FilterPanel({ columns, appliedFilters, onApply }: Props)
             local.map((filter, idx) => {
               const col = columns.find((c) => c.originalName === filter.column);
               const ops = operatorsForType(col?.inferredType ?? 'text');
+              const desc = buildFilterDesc(filter, lang);
               return (
-                <div key={filter.id} className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-mono font-bold text-primary-500 w-16 text-right select-none flex-shrink-0">
-                    {idx === 0 ? t('whereLabel') : t('andLabel')}
-                  </span>
-                  <select value={filter.column} onChange={(e) => patch(filter.id, { column: e.target.value })} className={clsx(selCls, 'min-w-[130px]')}>
-                    {columns.map((c) => <option key={c.originalName} value={c.originalName}>{c.originalName}</option>)}
-                  </select>
-                  <select value={filter.operator} onChange={(e) => patch(filter.id, { operator: e.target.value as FilterOperator })} className={clsx(selCls, 'min-w-[140px]')}>
-                    {ops.map((op) => <option key={op} value={op}>{t(OP_KEY_MAP[op] as any)}</option>)}
-                  </select>
-                  <ValueInput filter={filter} col={col} onChange={(p) => patch(filter.id, p)} />
-                  <button onClick={() => remove(filter.id)} className="text-slate-300 hover:text-red-400 transition-colors ml-auto">
-                    <X className="w-4 h-4" />
-                  </button>
+                <div key={filter.id} className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold text-primary-500 w-16 text-right select-none flex-shrink-0">
+                      {idx === 0 ? t('whereLabel') : t('andLabel')}
+                    </span>
+                    <select value={filter.column} onChange={(e) => patch(filter.id, { column: e.target.value })} className={clsx(selCls, 'min-w-[130px]')}>
+                      {columns.map((c) => <option key={c.originalName} value={c.originalName}>{c.originalName}</option>)}
+                    </select>
+                    <select value={filter.operator} onChange={(e) => patch(filter.id, { operator: e.target.value as FilterOperator })} className={clsx(selCls, 'min-w-[140px]')}>
+                      {ops.map((op) => <option key={op} value={op}>{t(OP_KEY_MAP[op] as any)}</option>)}
+                    </select>
+                    <ValueInput filter={filter} col={col} onChange={(p) => patch(filter.id, p)} />
+                    <button onClick={() => remove(filter.id)} className="text-slate-300 hover:text-red-400 transition-colors ml-auto">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {desc && (
+                    <p className="text-xs text-slate-400 pl-[72px] italic leading-none">
+                      → {desc}
+                    </p>
+                  )}
                 </div>
               );
             })
