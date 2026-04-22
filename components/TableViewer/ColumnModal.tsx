@@ -163,7 +163,7 @@ export default function ColumnModal({ col, table, onClose }: Props) {
             )}
             {col.nullable && (
               <span className="inline-flex items-center text-xs text-slate-400 bg-surface-100 px-2.5 py-1 rounded-full">
-                nullable
+                {t('nullableBadge')}
               </span>
             )}
           </div>

@@ -256,7 +256,7 @@ function buildChartsForTable(table: ParsedTable, cb: ChatbotColumns, isChatbot: 
 
 export function analyseTable(table: ParsedTable): TableAnalytics {
   const cb = detectChatbotColumns(table);
-  const isChatbot = chatbotScore(cb) >= 2;
+  const isChatbot = chatbotScore(cb) >= 2 && (cb.agent != null || cb.channel != null || cb.handover != null);
   return {
     tableName: table.name,
     metrics: buildMetrics(table, cb, isChatbot),

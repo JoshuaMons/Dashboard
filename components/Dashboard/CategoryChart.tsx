@@ -43,25 +43,26 @@ function InfoTooltip({ text }: { text: string }) {
   );
 }
 
-function RichBarTooltip({ active, payload, total, showPct }: any) {
+function RichBarTooltip({ active, payload, total, showPct, lang }: any) {
   if (!active || !payload?.length) return null;
   const entry = payload[0].payload;
   const raw = entry._rawValue ?? payload[0].value;
   const pct = total > 0 ? ((raw / total) * 100).toFixed(1) : '0';
+  const lbl = { count: lang === 'nl' ? 'Aantal' : 'Count', share: lang === 'nl' ? 'Aandeel' : 'Share', rank: lang === 'nl' ? 'Rang' : 'Rank' };
   return (
     <div className="bg-white border border-surface-200 rounded-xl shadow-lg p-3 text-xs min-w-[150px]">
       <p className="font-semibold text-slate-700 mb-2 max-w-[200px] truncate">{entry.name}</p>
       <div className="space-y-1.5">
         <div className="flex justify-between gap-5">
-          <span className="text-slate-400">Count</span>
+          <span className="text-slate-400">{lbl.count}</span>
           <span className="font-bold text-slate-900 tabular-nums">{raw.toLocaleString()}</span>
         </div>
         <div className="flex justify-between gap-5">
-          <span className="text-slate-400">Share</span>
+          <span className="text-slate-400">{lbl.share}</span>
           <span className="font-medium text-slate-700 tabular-nums">{pct}%</span>
         </div>
         <div className="flex justify-between gap-5 pt-1.5 border-t border-surface-100">
-          <span className="text-slate-400">Rank</span>
+          <span className="text-slate-400">{lbl.rank}</span>
           <span className="font-semibold text-primary-600">#{entry.rank}</span>
         </div>
       </div>
@@ -86,7 +87,7 @@ function ActivePieShape(props: any) {
 }
 
 export default function CategoryChart({ config }: { config: ChartConfig }) {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const [showPct, setShowPct] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [activePieIdx, setActivePieIdx] = useState<number | undefined>(undefined);
@@ -125,11 +126,11 @@ export default function CategoryChart({ config }: { config: ChartConfig }) {
           {desc && <InfoTooltip text={desc} />}
         </div>
         <p className="text-xs text-slate-400 mb-3">
-          Total: <span className="font-medium text-slate-600">{total.toLocaleString()}</span>
+          {t('chartTotal')}: <span className="font-medium text-slate-600">{total.toLocaleString()}</span>
           &ensp;·&ensp;
-          {config.data.length} categories
+          {config.data.length} {t('chartCategories')}
           &ensp;·&ensp;
-          <span className="text-slate-400">hover to inspect</span>
+          <span className="text-slate-400">{t('hoverToInspect')}</span>
         </p>
 
         <ResponsiveContainer width="100%" height={290}>
@@ -158,7 +159,7 @@ export default function CategoryChart({ config }: { config: ChartConfig }) {
                         {total.toLocaleString()}
                       </text>
                       <text x={cx} y={cy + 10} textAnchor="middle" fill="#94a3b8" fontSize={10}>
-                        total
+                        {t('chartTotalLabel')}
                       </text>
                     </g>
                   );
@@ -174,20 +175,21 @@ export default function CategoryChart({ config }: { config: ChartConfig }) {
                 if (!active || !payload?.length) return null;
                 const d = payload[0].payload;
                 const pct = total > 0 ? ((d._rawValue / total) * 100).toFixed(1) : '0';
+                const lbl = { count: lang === 'nl' ? 'Aantal' : 'Count', share: lang === 'nl' ? 'Aandeel' : 'Share', rank: lang === 'nl' ? 'Rang' : 'Rank' };
                 return (
                   <div className="bg-white border border-surface-200 rounded-xl shadow-lg p-3 text-xs min-w-[150px]">
                     <p className="font-semibold text-slate-700 mb-2 max-w-[200px] truncate">{d.name}</p>
                     <div className="space-y-1.5">
                       <div className="flex justify-between gap-5">
-                        <span className="text-slate-400">Count</span>
+                        <span className="text-slate-400">{lbl.count}</span>
                         <span className="font-bold text-slate-900 tabular-nums">{d._rawValue.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between gap-5">
-                        <span className="text-slate-400">Share</span>
+                        <span className="text-slate-400">{lbl.share}</span>
                         <span className="font-semibold text-primary-600 tabular-nums">{pct}%</span>
                       </div>
                       <div className="flex justify-between gap-5 pt-1.5 border-t border-surface-100">
-                        <span className="text-slate-400">Rank</span>
+                        <span className="text-slate-400">{lbl.rank}</span>
                         <span className="font-medium text-slate-700">#{d.rank}</span>
                       </div>
                     </div>
@@ -230,7 +232,7 @@ export default function CategoryChart({ config }: { config: ChartConfig }) {
               onClick={() => setSelected(null)}
               className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 transition-colors"
             >
-              <X className="w-3 h-3" /> clear
+              <X className="w-3 h-3" /> {t('clearSelection')}
             </button>
           )}
           {/* Count / % toggle */}
@@ -262,8 +264,8 @@ export default function CategoryChart({ config }: { config: ChartConfig }) {
       {/* Subtitle */}
       <p className="text-xs text-slate-400 mb-4">
         {selected
-          ? <span>Selected: <span className="font-medium text-slate-600">"{selected}"</span> — click again or clear to reset</span>
-          : <span>#1: <span className="font-medium text-slate-600">{topName}</span>&ensp;·&ensp;Total: <span className="font-medium text-slate-600">{total.toLocaleString()}</span></span>
+          ? <span>{t('chartSelected')}: <span className="font-medium text-slate-600">"{selected}"</span> — {t('clickToClear')}</span>
+          : <span>{t('chartNo1')}: <span className="font-medium text-slate-600">{topName}</span>&ensp;·&ensp;{t('chartTotal')}: <span className="font-medium text-slate-600">{total.toLocaleString()}</span></span>
         }
       </p>
 
@@ -285,7 +287,7 @@ export default function CategoryChart({ config }: { config: ChartConfig }) {
             axisLine={false}
             width={110}
           />
-          <Tooltip content={<RichBarTooltip total={total} showPct={showPct} />} />
+          <Tooltip content={<RichBarTooltip total={total} showPct={showPct} lang={lang} />} />
           <Bar
             dataKey="value"
             radius={[0, 4, 4, 0]}

@@ -37,7 +37,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-5">
       {/* Tab bar */}
-      <div className="bg-white border border-surface-200 rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 border border-surface-200 dark:border-slate-700 rounded-2xl shadow-card overflow-hidden">
         <div className="overflow-x-auto">
           <div className="flex min-w-max">
             {tabs.map((tab) => {
@@ -50,8 +50,8 @@ export default function Dashboard() {
                   className={clsx(
                     'flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
                     isActive
-                      ? 'border-primary-600 text-primary-700 bg-primary-50/50'
-                      : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-surface-50'
+                      ? 'border-primary-600 text-primary-700 dark:text-primary-400 bg-primary-50/50 dark:bg-primary-900/20'
+                      : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-surface-50 dark:hover:bg-slate-700/50'
                   )}
                 >
                   <Icon className="w-4 h-4 flex-shrink-0" />

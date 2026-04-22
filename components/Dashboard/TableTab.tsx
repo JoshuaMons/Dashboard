@@ -37,6 +37,21 @@ export default function TableTab({ table, analytics }: Props) {
     [filteredTable, analytics, appliedFilters.length]
   );
 
+  // Recompute sample values for category/boolean columns from filtered data
+  // so that filter dropdowns only show values present in the current filtered result
+  const filteredColumns = useMemo(() => {
+    if (appliedFilters.length === 0) return table.columns;
+    return table.columns.map((col) => {
+      if (col.inferredType !== 'category' && col.inferredType !== 'boolean') return col;
+      const seen = new Set<string>();
+      filteredData.forEach((row) => {
+        const v = row[col.originalName];
+        if (v != null && v !== '') seen.add(String(v));
+      });
+      return { ...col, sampleValues: Array.from(seen).slice(0, 20) };
+    });
+  }, [table.columns, filteredData, appliedFilters.length]);
+
   const { metrics, charts } = liveAnalytics;
   // Route by key presence: xKey → vertical axis chart (TimeSeriesChart); nameKey → categorical (CategoryChart)
   const timeSeries = charts.find((c) => c.type === 'area' || c.type === 'line');
@@ -44,9 +59,9 @@ export default function TableTab({ table, analytics }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Filter builder — passes appliedFilters so panel can show what's active */}
+      {/* Filter builder — passes filteredColumns so dropdowns reflect currently visible values */}
       <FilterPanel
-        columns={table.columns}
+        columns={filteredColumns}
         appliedFilters={appliedFilters}
         onApply={setAppliedFilters}
       />

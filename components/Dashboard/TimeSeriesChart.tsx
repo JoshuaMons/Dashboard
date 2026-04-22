@@ -41,9 +41,9 @@ function InfoTooltip({ text }: { text: string }) {
 }
 
 function RichTooltip({
-  active, payload, label, total, avg,
+  active, payload, label, total, avg, lang,
 }: {
-  active?: boolean; payload?: any[]; label?: string; total: number; avg: number;
+  active?: boolean; payload?: any[]; label?: string; total: number; avg: number; lang: 'en' | 'nl';
 }) {
   if (!active || !payload?.length) return null;
   const val = Number(payload[0].value) || 0;
@@ -51,21 +51,23 @@ function RichTooltip({
   const diff = avg > 0 ? ((val - avg) / avg * 100) : null;
   const above = diff !== null && diff >= 0;
 
+  const lbl = { count: lang === 'nl' ? 'Aantal' : 'Count', pctTotal: lang === 'nl' ? '% van totaal' : '% of total', vsAvg: lang === 'nl' ? 'vs gem' : 'vs avg' };
+
   return (
     <div className="bg-white border border-surface-200 rounded-xl shadow-lg p-3 text-xs min-w-[160px]">
       <p className="font-semibold text-slate-700 mb-2">{label}</p>
       <div className="space-y-1.5">
         <div className="flex justify-between gap-6">
-          <span className="text-slate-400">Count</span>
+          <span className="text-slate-400">{lbl.count}</span>
           <span className="font-bold text-slate-900 tabular-nums">{val.toLocaleString()}</span>
         </div>
         <div className="flex justify-between gap-6">
-          <span className="text-slate-400">% of total</span>
+          <span className="text-slate-400">{lbl.pctTotal}</span>
           <span className="font-medium text-slate-600 tabular-nums">{pct}%</span>
         </div>
         {diff !== null && (
           <div className="flex justify-between gap-6 pt-1.5 border-t border-surface-100">
-            <span className="text-slate-400">vs avg</span>
+            <span className="text-slate-400">{lbl.vsAvg}</span>
             <span className={clsx('font-semibold tabular-nums', above ? 'text-emerald-600' : 'text-red-500')}>
               {above ? '+' : ''}{diff.toFixed(1)}%
             </span>
@@ -77,7 +79,7 @@ function RichTooltip({
 }
 
 export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
-  const { lang } = useLanguage();
+  const { lang, t } = useLanguage();
   const [brushOn, setBrushOn] = useState(false);
 
   const title = lang === 'nl' ? config.titleNl : config.titleEn;
@@ -130,7 +132,7 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
                 ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300'
                 : 'text-slate-400 hover:bg-surface-100'
             )}
-            title={brushOn ? 'Disable zoom' : 'Enable zoom / pan'}
+            title={brushOn ? t('zoomDisable') : t('zoomEnable')}
           >
             {brushOn ? <ZoomOut className="w-3.5 h-3.5" /> : <ZoomIn className="w-3.5 h-3.5" />}
           </button>
@@ -139,11 +141,11 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
 
       {/* Subtitle */}
       <p className="text-xs text-slate-400 mb-4">
-        Total: <span className="font-medium text-slate-600">{total.toLocaleString()}</span>
+        {t('chartTotal')}: <span className="font-medium text-slate-600">{total.toLocaleString()}</span>
         &ensp;·&ensp;
-        Avg/period: <span className="font-medium text-slate-600">{avg.toLocaleString()}</span>
+        {t('chartAvgPeriod')}: <span className="font-medium text-slate-600">{avg.toLocaleString()}</span>
         &ensp;·&ensp;
-        <span className="text-slate-400">{config.data.length} periods</span>
+        <span className="text-slate-400">{config.data.length} {t('chartPeriods')}</span>
       </p>
 
       <ResponsiveContainer width="100%" height={chartHeight}>
@@ -158,7 +160,7 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
             <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-            <Tooltip content={(p) => <RichTooltip {...p} total={total} avg={avg} />} />
+            <Tooltip content={(p) => <RichTooltip {...p} total={total} avg={avg} lang={lang} />} />
             <ReferenceLine
               y={avg}
               stroke="#cbd5e1"
@@ -184,7 +186,7 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
             <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-            <Tooltip content={(p) => <RichTooltip {...p} total={total} avg={avg} />} />
+            <Tooltip content={(p) => <RichTooltip {...p} total={total} avg={avg} lang={lang} />} />
             <ReferenceLine
               y={avg}
               stroke="#cbd5e1"
@@ -202,7 +204,7 @@ export default function TimeSeriesChart({ config }: { config: ChartConfig }) {
 
       {brushOn && (
         <p className="text-xs text-slate-400 text-center mt-2">
-          Drag the handles below to zoom · Drag the bar to pan
+          {t('zoomHint')}
         </p>
       )}
     </div>

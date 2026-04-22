@@ -148,6 +148,34 @@ const translations = {
     colModalDescription: 'About this column',
     colModalNoData: 'Not enough data to show a distribution.',
 
+    // Chart subtitle / interaction strings
+    chartTotal: 'Total',
+    chartAvgPeriod: 'Avg/period',
+    chartPeriods: 'periods',
+    zoomHint: 'Drag the handles to zoom · Drag the bar to pan',
+    zoomEnable: 'Enable zoom / pan',
+    zoomDisable: 'Disable zoom',
+    recentTrend: 'Recent trend vs. earlier periods',
+    chartCategories: 'categories',
+    hoverToInspect: 'hover to inspect',
+    chartTotalLabel: 'total',
+    clearSelection: 'clear',
+    chartSelected: 'Selected',
+    clickToClear: 'click again or clear to reset',
+    chartNo1: '#1',
+    tooltipCount: 'Count',
+    tooltipPctOfTotal: '% of total',
+    tooltipVsAvg: 'vs avg',
+    tooltipShare: 'Share',
+    tooltipRank: 'Rank',
+
+    // Theme
+    themeLight: 'Light mode',
+    themeDark: 'Dark mode',
+
+    // Nullable badge
+    nullableBadge: 'nullable',
+
     // Auto-generated column descriptions
     descDate: 'Stores timestamps or dates. Use this column for time-series analysis and trend detection over time.',
     descNumber: 'Contains numeric values. Suitable for statistical analysis, averages, and distribution charts.',
@@ -309,6 +337,34 @@ const translations = {
     colModalOther: '(overig)',
     colModalDescription: 'Over deze kolom',
     colModalNoData: 'Onvoldoende gegevens voor een verdeling.',
+
+    // Chart subtitle / interaction strings
+    chartTotal: 'Totaal',
+    chartAvgPeriod: 'Gem/periode',
+    chartPeriods: 'perioden',
+    zoomHint: 'Sleep de handvatten om in te zoomen · Sleep de balk om te pannen',
+    zoomEnable: 'Zoom / pan inschakelen',
+    zoomDisable: 'Zoom uitschakelen',
+    recentTrend: 'Recente trend t.o.v. eerdere perioden',
+    chartCategories: 'categorieën',
+    hoverToInspect: 'hover om te inspecteren',
+    chartTotalLabel: 'totaal',
+    clearSelection: 'wissen',
+    chartSelected: 'Geselecteerd',
+    clickToClear: 'klik opnieuw of wis om te resetten',
+    chartNo1: '#1',
+    tooltipCount: 'Aantal',
+    tooltipPctOfTotal: '% van totaal',
+    tooltipVsAvg: 'vs gem',
+    tooltipShare: 'Aandeel',
+    tooltipRank: 'Rang',
+
+    // Theme
+    themeLight: 'Lichte modus',
+    themeDark: 'Donkere modus',
+
+    // Nullable badge
+    nullableBadge: 'nullable',
 
     // Auto-generated column descriptions
     descDate: 'Bevat tijdstempels of datums. Gebruik deze kolom voor tijdreeksanalyse en het detecteren van trends.',
