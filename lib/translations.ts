@@ -8,9 +8,9 @@ const translations = {
     welcomeDescription: 'Analyse your chatbot handover data with interactive charts, tables, and insights. Supports SQLite (.db, .sqlite), SQL dumps (.sql) and CSV (.csv) — including large files.',
     dropzoneTitle: 'Drop your database file here',
     dropzoneOr: 'or click to browse',
-    dropzoneFormats: 'Supports SQLite (.db, .sqlite) and CSV (.csv)',
+    dropzoneFormats: 'Supports SQLite, SQL dump and CSV',
     uploading: 'Processing…',
-    uploadError: 'Could not read file. Make sure it is a valid SQLite or CSV file.',
+    uploadError: 'Could not read file. Make sure it is a valid SQLite, SQL or CSV file.',
 
     // Nav
     dashboard: 'Dashboard',
@@ -18,9 +18,11 @@ const translations = {
     newFile: 'New File',
     language: 'Language',
 
-    // Dashboard
+    // Dashboard tabs
     overview: 'Overview',
     handovers: 'Handovers',
+
+    // Overview tab
     totalRecords: 'Total Records',
     totalTables: 'Tables',
     totalColumns: 'Columns',
@@ -30,8 +32,11 @@ const translations = {
     noCharts: 'No charts could be generated for this dataset.',
     loadingCharts: 'Analysing database…',
     rows: 'rows',
-    showingRows: 'Showing first',
+    showingRows: 'Showing',
     of: 'of',
+    allTablesTitle: 'All Tables',
+    tableSummaryRows: 'rows',
+    tableSummaryColumns: 'columns',
 
     // Chatbot metrics
     totalHandovers: 'Total Handovers',
@@ -52,6 +57,35 @@ const translations = {
     countBy: 'Count by',
     count: 'Count',
     value: 'Value',
+
+    // Filters
+    filterTitle: 'Filters',
+    addFilter: 'Add filter',
+    clearAllFilters: 'Clear all',
+    whereLabel: 'WHERE',
+    andLabel: 'AND',
+    columnLabel: 'Column',
+    operatorLabel: 'Operator',
+    valueLabel: 'Value',
+    value2Label: 'and',
+    opEquals: 'equals',
+    opNotEquals: 'does not equal',
+    opContains: 'contains',
+    opNotContains: 'does not contain',
+    opStartsWith: 'starts with',
+    opEndsWith: 'ends with',
+    opGreaterThan: 'is greater than',
+    opLessThan: 'is less than',
+    opBetween: 'is between',
+    opIsEmpty: 'is empty',
+    opIsNotEmpty: 'is not empty',
+    activeFilters: 'active filter(s)',
+    noFilterResults: 'No results match the current filters.',
+    showFilters: 'Show filters',
+    hideFilters: 'Hide filters',
+    filtered: 'filtered',
+    selectColumn: 'Select column…',
+    enterValue: 'Enter value…',
 
     // Tables page
     tablesOverview: 'Database Tables',
@@ -77,6 +111,7 @@ const translations = {
     typeBoolean: 'Boolean',
     typeText: 'Text',
   },
+
   nl: {
     // Landing
     welcomeTitle: 'Chatbot Dashboard',
@@ -84,9 +119,9 @@ const translations = {
     welcomeDescription: 'Analyseer uw chatbot handover data met interactieve grafieken, tabellen en inzichten. Ondersteunt SQLite (.db, .sqlite), SQL-dumps (.sql) en CSV (.csv) — inclusief grote bestanden.',
     dropzoneTitle: 'Sleep uw databasebestand hierheen',
     dropzoneOr: 'of klik om te bladeren',
-    dropzoneFormats: 'Ondersteunt SQLite (.db, .sqlite) en CSV (.csv)',
+    dropzoneFormats: 'Ondersteunt SQLite, SQL-dump en CSV',
     uploading: 'Verwerken…',
-    uploadError: 'Kon het bestand niet lezen. Zorg ervoor dat het een geldig SQLite- of CSV-bestand is.',
+    uploadError: 'Kon het bestand niet lezen. Zorg ervoor dat het een geldig SQLite-, SQL- of CSV-bestand is.',
 
     // Nav
     dashboard: 'Dashboard',
@@ -94,9 +129,11 @@ const translations = {
     newFile: 'Nieuw Bestand',
     language: 'Taal',
 
-    // Dashboard
+    // Dashboard tabs
     overview: 'Overzicht',
     handovers: 'Handovers',
+
+    // Overview tab
     totalRecords: 'Totaal Records',
     totalTables: 'Tabellen',
     totalColumns: 'Kolommen',
@@ -106,8 +143,11 @@ const translations = {
     noCharts: 'Er konden geen grafieken worden gegenereerd voor deze dataset.',
     loadingCharts: 'Database analyseren…',
     rows: 'rijen',
-    showingRows: 'Eerste',
+    showingRows: 'Weergave',
     of: 'van',
+    allTablesTitle: 'Alle Tabellen',
+    tableSummaryRows: 'rijen',
+    tableSummaryColumns: 'kolommen',
 
     // Chatbot metrics
     totalHandovers: 'Totaal Handovers',
@@ -128,6 +168,35 @@ const translations = {
     countBy: 'Aantal per',
     count: 'Aantal',
     value: 'Waarde',
+
+    // Filters
+    filterTitle: 'Filters',
+    addFilter: 'Filter toevoegen',
+    clearAllFilters: 'Alles wissen',
+    whereLabel: 'WAARBIJ',
+    andLabel: 'EN',
+    columnLabel: 'Kolom',
+    operatorLabel: 'Operator',
+    valueLabel: 'Waarde',
+    value2Label: 'en',
+    opEquals: 'gelijk aan',
+    opNotEquals: 'niet gelijk aan',
+    opContains: 'bevat',
+    opNotContains: 'bevat niet',
+    opStartsWith: 'begint met',
+    opEndsWith: 'eindigt met',
+    opGreaterThan: 'groter dan',
+    opLessThan: 'kleiner dan',
+    opBetween: 'tussen',
+    opIsEmpty: 'is leeg',
+    opIsNotEmpty: 'is niet leeg',
+    activeFilters: 'actieve filter(s)',
+    noFilterResults: 'Geen resultaten gevonden voor de huidige filters.',
+    showFilters: 'Filters tonen',
+    hideFilters: 'Filters verbergen',
+    filtered: 'gefilterd',
+    selectColumn: 'Selecteer kolom…',
+    enterValue: 'Voer waarde in…',
 
     // Tables page
     tablesOverview: 'Databasetabellen',

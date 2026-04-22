@@ -1,6 +1,21 @@
 export type Language = 'en' | 'nl';
 export type ColumnType = 'date' | 'number' | 'category' | 'boolean' | 'text';
 
+export type FilterOperator =
+  | 'equals' | 'not_equals'
+  | 'contains' | 'not_contains'
+  | 'starts_with' | 'ends_with'
+  | 'greater_than' | 'less_than' | 'between'
+  | 'is_empty' | 'is_not_empty';
+
+export interface FilterRule {
+  id: string;
+  column: string;
+  operator: FilterOperator;
+  value: string;
+  value2?: string;
+}
+
 export interface ParsedColumn {
   name: string;
   originalName: string;
@@ -63,9 +78,19 @@ export interface ChatbotColumns {
   resolved?: string;
 }
 
-export interface AnalyticsResult {
+export interface TableAnalytics {
+  tableName: string;
   metrics: MetricCard[];
   charts: ChartConfig[];
   isChatbotData: boolean;
   chatbotColumns: ChatbotColumns;
+}
+
+export interface FullAnalyticsResult {
+  overview: {
+    metrics: MetricCard[];
+    charts: ChartConfig[];
+  };
+  tableAnalytics: TableAnalytics[];
+  isChatbotData: boolean;
 }

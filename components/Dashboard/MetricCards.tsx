@@ -2,6 +2,7 @@
 
 import {
   Database, Calendar, Clock, CheckCircle, Timer, Tag, Globe, User, TrendingUp,
+  Table2, Columns,
 } from 'lucide-react';
 import { MetricCard } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -17,6 +18,8 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   globe: Globe,
   user: User,
   trending: TrendingUp,
+  table: Table2,
+  columns: Columns,
 };
 
 function MetricCardItem({ card }: { card: MetricCard }) {

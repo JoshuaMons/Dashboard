@@ -1,12 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { DatabaseInfo, AnalyticsResult } from '@/types';
+import { DatabaseInfo, FullAnalyticsResult } from '@/types';
 import { analyseDatabase } from '@/lib/analytics';
 
 interface DatabaseContextValue {
   database: DatabaseInfo | null;
-  analytics: AnalyticsResult | null;
+  analytics: FullAnalyticsResult | null;
   isLoading: boolean;
   progress: number;
   progressMsg: string;
@@ -28,7 +28,7 @@ const DatabaseContext = createContext<DatabaseContextValue>({
 
 export function DatabaseProvider({ children }: { children: ReactNode }) {
   const [database, setDatabase] = useState<DatabaseInfo | null>(null);
-  const [analytics, setAnalytics] = useState<AnalyticsResult | null>(null);
+  const [analytics, setAnalytics] = useState<FullAnalyticsResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressMsg, setProgressMsg] = useState('');
@@ -39,7 +39,6 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     setError(null);
     setProgress(0);
     setProgressMsg('');
-
     try {
       const { parseFile } = await import('@/lib/database');
       const info = await parseFile(file, (pct, msg) => {
@@ -67,9 +66,7 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <DatabaseContext.Provider
-      value={{ database, analytics, isLoading, progress, progressMsg, error, loadFile, clearDatabase }}
-    >
+    <DatabaseContext.Provider value={{ database, analytics, isLoading, progress, progressMsg, error, loadFile, clearDatabase }}>
       {children}
     </DatabaseContext.Provider>
   );
